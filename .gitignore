@@ -1,0 +1,52 @@
+# ==== Build results ====
+bin/
+obj/
+out/
+[Dd]ebug/
+[Rr]elease/
+
+# ==== .NET / NuGet ====
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+artifacts/
+.nuget/
+
+# ==== Rider / JetBrains ====
+.idea/
+*.sln.iml
+
+# ==== Visual Studio ====
+.vs/
+*.vssscc
+
+# ==== VS Code ====
+.vscode/
+
+# ==== macOS ====
+.DS_Store
+
+# ==== Logs ====
+*.log
+logs/
+
+# ==== Локальные загруженные файлы (не должны попадать в репозиторий) ====
+FileUploadService/FilesUploadedLocally/
+
+# ==== Секреты / локальные настройки ====
+appsettings.Development.json
+appsettings.*.local.json
+*.pfx
+*.key
+
+# ==== Docker / MinIO локальные данные ====
+minio_data/
+docker-compose.override.yml
+
+# ==== EF Core ====
+*.db
+*.db-shm
+*.db-wal
