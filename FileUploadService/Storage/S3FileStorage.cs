@@ -1,6 +1,5 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using FileUploadService.Config;
 using Microsoft.Extensions.Options;
 
@@ -21,16 +20,12 @@ public class S3FileStorage(IAmazonS3 s3Client, IOptions<S3Options> options) : IF
                 Key = fileName
             };
             
-            var response = await _s3Client.GetObjectMetadataAsync(request);
+            await _s3Client.GetObjectMetadataAsync(request); //выбросит исключение AmazonS3Exception
 
             return true;
         }
         catch (AmazonS3Exception ex )
         {
-            
-            if (string.Equals(ex.ErrorCode, "NoSuchBucket"))
-                return false;
-            
             if (string.Equals(ex.ErrorCode, "NotFound"))
                 return false;
 
@@ -40,21 +35,35 @@ public class S3FileStorage(IAmazonS3 s3Client, IOptions<S3Options> options) : IF
 
     public async Task UploadAsync(string fileName, Stream fileStream)
     {
-        
-        
         var request = new PutObjectRequest
         {
             BucketName = _s3Options.Value.BucketName,
-            Key = fileName, //тут должен быть id
+            Key = fileName,
             InputStream = fileStream
         };
         
         await _s3Client.PutObjectAsync(request);
     }
 
-    public Task DeleteAsync(string fileName)
+    public async Task DeleteAsync(string fileName)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var deleteObjRequest = new DeleteObjectRequest
+            {
+                BucketName = _s3Options.Value.BucketName, 
+                Key = fileName
+            };
+            await _s3Client.DeleteObjectAsync(deleteObjRequest);
+        } 
+        catch (AmazonS3Exception ex )
+        {
+            if (string.Equals(ex.ErrorCode, "NotFound"))
+                throw new FileNotFoundException("File not found", fileName);
+
+            throw;
+        }
+        
     }
 
     public Task<Stream> OpenReadAsync(string fileName)

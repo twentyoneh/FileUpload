@@ -105,8 +105,16 @@ public class FileService(IFileRepository fileRepository, IFileStorage fileStorag
             throw new KeyNotFoundException("File not found");
         
         var fileName = id + file.FileExtension;
-        
-        await fileStorage.DeleteAsync(fileName);
+
+        try
+        {
+            await fileStorage.DeleteAsync(fileName);
+        }
+        catch (Exception e)
+        {
+            if (e is FileNotFoundException)
+                throw new KeyNotFoundException("File not found");
+        }
         await fileRepository.DeleteAsync(id);
     }
 
