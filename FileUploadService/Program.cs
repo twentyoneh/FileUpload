@@ -20,7 +20,7 @@ builder.Services.Configure<S3Options>(builder.Configuration.GetSection("S3")); /
 
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IFileStorage, LocalFileStorage> ();
+builder.Services.AddScoped<IFileStorage, S3FileStorage> ();
 
 
 builder.Services.AddSingleton<IAmazonS3>(sp =>

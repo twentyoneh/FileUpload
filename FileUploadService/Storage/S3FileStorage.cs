@@ -47,27 +47,36 @@ public class S3FileStorage(IAmazonS3 s3Client, IOptions<S3Options> options) : IF
 
     public async Task DeleteAsync(string fileName)
     {
-        try
+        var deleteObjRequest = new DeleteObjectRequest
         {
-            var deleteObjRequest = new DeleteObjectRequest
-            {
-                BucketName = _s3Options.Value.BucketName, 
-                Key = fileName
-            };
-            await _s3Client.DeleteObjectAsync(deleteObjRequest);
-        } 
-        catch (AmazonS3Exception ex )
-        {
-            if (string.Equals(ex.ErrorCode, "NotFound"))
-                throw new FileNotFoundException("File not found", fileName);
-
-            throw;
-        }
+            BucketName = _s3Options.Value.BucketName, 
+            Key = fileName
+        };
+        await _s3Client.DeleteObjectAsync(deleteObjRequest);
         
     }
 
-    public Task<Stream> OpenReadAsync(string fileName)
+    public async Task<Stream> OpenReadAsync(string fileName)
     {
-        throw new NotImplementedException();
+        var request = new GetObjectRequest()
+        {
+            BucketName = _s3Options.Value.BucketName,
+            Key = fileName
+        };
+        
+        try
+        {
+            var response =  await _s3Client.GetObjectAsync(request); //TODO: поменять в будущем 
+            return response.ResponseStream;
+        }
+        catch (AmazonS3Exception ex)
+        {
+            if (ex.ErrorCode == "NoSuchKey")
+            {
+                throw new FileNotFoundException("No such key", ex);
+            }
+
+            throw;
+        }
     }
 }
