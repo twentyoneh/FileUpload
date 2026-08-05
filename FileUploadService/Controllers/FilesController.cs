@@ -15,6 +15,13 @@ public class FilesController : Controller
         _fileService = fileService;
     }
 
+    [HttpGet("welcome")]
+    public Task<IActionResult> HelloWorld()
+    {
+        return Task.FromResult<IActionResult>(Ok("welcom to contoller!"));
+    }
+    
+
     [HttpGet("{id}/download")]
     public async Task<IActionResult> Download(Guid id)
     {

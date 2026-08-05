@@ -38,7 +38,7 @@ public class FileService(IFileRepository fileRepository, IFileStorage fileStorag
         };
     }
 
-    public async Task<FileResponseDto> UploadFileAsync(IFormFile file)
+    public async Task<FileResponseDto> UploadFileAsync(IFormFile file) //file123.txt
     {
         
         if (file == null || file.Length == 0)
@@ -51,8 +51,8 @@ public class FileService(IFileRepository fileRepository, IFileStorage fileStorag
             throw new FileUploadSizeException("File is too large");
         }
         
-        var fileId = Guid.NewGuid();
-        var fileName = fileId + Path.GetExtension(file.FileName);
+        var fileId = Guid.NewGuid(); // генерация ID 3819274
+        var fileName = fileId + Path.GetExtension(file.FileName); // 3819274.txt
 
         
         await using (var stream = file.OpenReadStream())
@@ -128,6 +128,9 @@ public class FileService(IFileRepository fileRepository, IFileStorage fileStorag
 
         var contentTypeExists = provider.TryGetContentType(fileName, out var contentType);
         var displayContentType = contentTypeExists ? contentType : "application/octet-stream";
+
+        file.DownloadAt = DateTime.UtcNow;
+        await fileRepository.UpdateAsync(file);
         
         return new FileDownloadDTO()
         {

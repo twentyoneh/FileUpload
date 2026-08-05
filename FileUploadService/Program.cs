@@ -1,7 +1,11 @@
+using Amazon.S3;
+using FileUploadService.Config;
 using FileUploadService.Data;
 using FileUploadService.Repositories;
 using FileUploadService.Services;
+using FileUploadService.Storage;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +15,27 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<S3Options>(builder.Configuration.GetSection("S3")); //берем секцию из s3
+
+
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IFileStorage, LocalFileStorage> ();
+
+
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var options = sp.GetRequiredService<IOptions<S3Options>>().Value;
+
+    var config = new AmazonS3Config
+    {
+        ServiceURL = options.ServiceUrl,
+        ForcePathStyle = true
+    };
+
+    return new AmazonS3Client(options.AccessKey, options.SecretKey, config);
+});
+// builder.Services.AddScoped<>()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
